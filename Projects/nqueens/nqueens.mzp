@@ -1,0 +1,16 @@
+{
+    "openFiles": [
+        "nqueens.mzn",
+        "visualise.mzn",
+        "nqueens.html"
+    ],
+    "openTab": 0,
+    "projectFiles": [
+        "nqueens.html",
+        "nqueens.mzn",
+        "visualise.mzn"
+    ],
+    "selectedBuiltinConfigId": "org.gecode.gecode",
+    "selectedBuiltinConfigVersion": "6.3.0",
+    "version": 106
+}
