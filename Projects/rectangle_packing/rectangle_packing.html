@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <script src="/minizinc-ide.js"></script>
+  <style>
+    html,
+    body {
+      font-family: 'Helvetica', sans-serif;
+    }
+    h3 {
+      margin: 0;
+      margin-bottom: 1rem;
+    }
+    main {
+      padding: 1rem;
+    }
+    #board {
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <h3>Packing squares of side lengths 1..<span id="count">n</span></h3>
+    <div id="label"></div>
+    <svg id="board">
+    </svg>
+  </main>
+  <script>
+    (async function () {
+      const basis = 32;
+      const spacing = 2;
+
+      const n = await MiniZincIDE.getUserData();
+      document.getElementById('count').textContent = n;
+      const getColor = (x) => `hsl(${(x - 1) * (360 / n)},100%,75%)`;
+
+      const board = document.getElementById('board');
+      const label = document.getElementById('label');
+
+      // Update visualisation
+      function setSolution(data) {
+        label.textContent = `Width: ${data.width}, height: ${data.height}, area: ${data.width * data.height}`;
+        while (board.firstChild) {
+          board.removeChild(board.lastChild);
+        }
+        board.setAttribute('width', data.width * basis);
+        board.setAttribute('height', data.height * basis);
+        for (const square of data.squares) {
+          const color = getColor(square.size);
+          const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          rect.setAttribute('fill', color);
+          rect.setAttribute('stroke', 'black');
+          rect.setAttribute('stroke-width', 1);
+          rect.setAttribute('x', (square.x - 1) * basis + spacing / 2);
+          rect.setAttribute('y', (square.y - 1) * basis + spacing / 2);
+          rect.setAttribute('width', square.size * basis - spacing);
+          rect.setAttribute('height', square.size * basis - spacing);
+          rect.setAttribute('rx', 3);
+          rect.setAttribute('ry', 3);
+          board.appendChild(rect);
+        }
+      }
+
+      // Visualise last solution on startup
+      const numSols = await MiniZincIDE.getNumSolutions();
+      if (numSols > 0) {
+        const solution = await MiniZincIDE.getSolution(numSols - 1);
+        setSolution(solution.data);
+      }
+
+      // Show new solutions if we're following the latest solution
+      let followLatest = true;
+      MiniZincIDE.on('solution', (solution) => {
+        if (followLatest) {
+          setSolution(solution.data);
+        }
+      });
+
+      MiniZincIDE.on('goToSolution', async (index) => {
+        // Requesting index -1 turns on following latest solution
+        // Otherwise, we stop showing the latest solution and show the requested one
+        followLatest = index === -1;
+        const solution = await MiniZincIDE.getSolution(index);
+        setSolution(solution.data);
+      });
+    })();
+  </script>
+</body>
+
+</html>
