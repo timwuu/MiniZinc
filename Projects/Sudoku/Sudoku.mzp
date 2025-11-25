@@ -1,0 +1,16 @@
+{
+    "openFiles": [
+        "sudoku.mzn",
+        "visualise.mzn",
+        "sudoku.html"
+    ],
+    "openTab": 0,
+    "projectFiles": [
+        "sudoku.html",
+        "sudoku.mzn",
+        "visualise.mzn"
+    ],
+    "selectedBuiltinConfigId": "org.gecode.gecode",
+    "selectedBuiltinConfigVersion": "6.3.0",
+    "version": 106
+}

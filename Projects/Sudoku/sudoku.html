@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <script src="/minizinc-ide.js"></script>
+  <style>
+    html,
+    body {
+      font-family: 'Helvetica', sans-serif;
+    }
+
+    #board {
+      border: solid 1px #000;
+      width: min-content;
+    }
+
+    .cell {
+      width: 2rem;
+      height: 2rem;
+      border: solid 1px #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: red;
+    }
+
+    .cell.fixed {
+      color: black;
+    }
+
+    .cell:nth-child(3n) {
+      border-right: solid 2px #000;
+    }
+
+    .row {
+      display: flex;
+      width: min-content;
+    }
+
+    .row:nth-child(3n) {
+      border-bottom: solid 1px #000;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="board">
+  </div>
+  <script>
+    (async function () {
+      const fixed = await MiniZincIDE.getUserData();
+      const board = document.getElementById('board');
+      const rows = [];
+      for (const fixedRow of fixed) {
+        const row = [];
+        const rowElem = document.createElement('div');
+        rowElem.classList.add('row');
+        for (const fixedCell of fixedRow) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+          if (fixedCell !== null) {
+            cell.textContent = fixedCell;
+            cell.classList.add('fixed')
+          }
+          row.push(cell);
+          rowElem.appendChild(cell);
+        }
+        rows.push(row);
+        board.appendChild(rowElem);
+      }
+
+      function setSolution(data) {
+        for (let i = 0; i < 9; i++) {
+          for (let j = 0; j < 9; j++) {
+            rows[i][j].textContent = data[i][j];
+          }
+        }
+      }
+
+      // Visualise last solution on startup
+      const numSols = await MiniZincIDE.getNumSolutions();
+      if (numSols > 0) {
+        const solution = await MiniZincIDE.getSolution(numSols - 1);
+        setSolution(solution.data);
+      }
+
+      // Show new solutions if we're following the latest solution
+      let followLatest = true;
+      MiniZincIDE.on('solution', (solution) => {
+        if (followLatest) {
+          setSolution(solution.data);
+        }
+      });
+
+      MiniZincIDE.on('goToSolution', async (index) => {
+        // Requesting index -1 turns on following latest solution
+        // Otherwise, we stop showing the latest solution and show the requested one
+        followLatest = index === -1;
+        const solution = await MiniZincIDE.getSolution(index);
+        setSolution(solution.data);
+      });
+    })();
+  </script>
+</body>
+
+</html>
